@@ -507,15 +507,25 @@ function showEditContainerModal() {
 function showEditItemModal(itemName) {
   selectedItem = items.find(item => item.name === itemName);
   if (selectedItem) {
+    populateEditItemContainerSelect();
     editItemNameInput.value = selectedItem.name;
-    editItemContainerSelect.value = selectedItem.containerId;
     editItemWikiPageInput.value = selectedItem.wikiPage;
     editItemDescriptionInput.value = selectedItem.description;
     editItemImageUrlInput.value = selectedItem.imageUrl;
-    populateEditItemContainerSelect();
+
+    const options = editItemContainerSelect.options;
+    for (let i = 0; i < options.length; i++) {
+      if (options[i].value === selectedItem.containerId) {
+        options[i].setAttribute('selected', true);
+        break;
+      }
+    }
+
     editItemModal.classList.add("is-active");
   }
 }
+
+
 
 searchBox.addEventListener("input", handleSearchInput);
 

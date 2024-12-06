@@ -6,7 +6,7 @@ build:
 	go build ./cmd/server/
 
 build-docker:
-	docker build -t hackmap -f ./deployments/Dockerfile .
+	docker build -t hackrva/hackmap -f ./deployments/Dockerfile .
 run-docker:
 	docker run -p 8080:8080 -v $(PWD)/store:/store hackmap
 

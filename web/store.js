@@ -18,12 +18,20 @@ export function setUseServer(mode) {
   useServer = mode;
 }
 
-export function generateId() {
-  return '_' + Math.random().toString(36).substr(2, 9);
+export async function generateId() {
+  const response = await fetch('/generateUUID');
+  if (response.ok) {
+    const data = await response.json();
+    return data.uuid;
+  } else {
+    console.error('Failed to generate UUID from server');
+    return '_' + Math.random().toString(36).substr(2, 9);
+  }
 }
 
 export async function addContainer(x, y, width, height, label, wikiPage = "", description = "", imageUrl = "", rotation = 0) {
-  const newContainer = new Container(generateId(), x, y, width, height, label, rotation, wikiPage, description, imageUrl);
+  const id = await generateId();
+  const newContainer = new Container(id, x, y, width, height, label, rotation, wikiPage, description, imageUrl);
   containers.push(newContainer);
   if (useServer) {
     await saveContainersToServer();
@@ -32,7 +40,8 @@ export async function addContainer(x, y, width, height, label, wikiPage = "", de
 }
 
 export async function addItemToContainer(itemName, containerId, wikiPage = "", description = "", imageUrl = "") {
-  items.push({ name: itemName, containerId, wikiPage, description, imageUrl });
+  const id = await generateId();
+  items.push({ id, name: itemName, containerId, wikiPage, description, imageUrl });
   if (useServer) {
     await saveItemsToServer();
   }
@@ -83,7 +92,7 @@ export async function saveContainersToServer() {
     imageUrl: container.imageUrl
   }));
 
-  const response = await fetch('/saveContainers', {
+  const response = await fetch('/containers', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -96,7 +105,7 @@ export async function saveContainersToServer() {
 }
 
 export async function saveItemsToServer() {
-  const response = await fetch('/saveItems', {
+  const response = await fetch('/items', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -109,7 +118,7 @@ export async function saveItemsToServer() {
 }
 
 export async function loadContainersFromServer() {
-  const response = await fetch('/loadContainers');
+  const response = await fetch('/containers');
   if (response.ok) {
     const data = await response.json();
     containers = data.map(container => new Container(
@@ -131,7 +140,7 @@ export async function loadContainersFromServer() {
 }
 
 export async function loadItemsFromServer() {
-  const response = await fetch('/loadItems');
+  const response = await fetch('/items');
   if (response.ok) {
     items = await response.json();
   } else {
