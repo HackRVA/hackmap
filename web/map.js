@@ -513,10 +513,11 @@ function showEditItemModal(itemName) {
     editItemDescriptionInput.value = selectedItem.description;
     editItemImageUrlInput.value = selectedItem.imageUrl;
 
+    // Set the correct container option to selected
     const options = editItemContainerSelect.options;
     for (let i = 0; i < options.length; i++) {
       if (options[i].value === selectedItem.containerId) {
-        options[i].setAttribute('selected', true);
+        options[i].selected = true;
         break;
       }
     }
