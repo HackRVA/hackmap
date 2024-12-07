@@ -19,7 +19,10 @@ export class Rect {
     const localY = -dx * sin + dy * cos;
 
     return (
-      Math.abs(localX) <= this.width && Math.abs(localY) <= this.height
+      localX >= 0 &&
+      localX <= this.width &&
+      localY >= 0 &&
+      localY <= this.height
     );
   }
 
