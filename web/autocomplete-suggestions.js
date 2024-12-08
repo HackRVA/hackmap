@@ -17,6 +17,8 @@ class AutocompleteSuggestions extends HTMLElement {
       div.textContent = suggestion.name;
       div.addEventListener('click', () => {
         this.dispatchEvent(new CustomEvent('suggestion-click', { detail: suggestion }));
+        const searchBar = document.querySelector('search-bar');
+        searchBar.dispatchEvent(new CustomEvent('search-enter', { detail: suggestion.name.toLowerCase() }));
       });
       this.appendChild(div);
     });
