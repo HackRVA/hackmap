@@ -25,10 +25,11 @@ func (r *Router) getFrontendHandler() http.Handler {
 func (r *Router) Run(port string) {
 	http.Handle("/", r.getFrontendHandler())
 	http.HandleFunc("/generateUUID", r.generateUUID)
-	http.HandleFunc("/containers", r.containerEndpoint)
-	http.HandleFunc("/containers.csv", r.serveContainersCSV)
-	http.HandleFunc("/items", r.itemEndpoint)
-	http.HandleFunc("/items.csv", r.serveItemsCSV)
+	http.HandleFunc("/container", r.containerEndpoint)
+	http.HandleFunc("/item", r.itemEndpoint)
+	http.HandleFunc("/download/containers.csv", r.serveContainersCSV)
+	http.HandleFunc("/download/items.csv", r.serveItemsCSV)
+	http.HandleFunc("/container/", r.containerImageEndpoint)
 
 	log.Printf("Serving embedded files on HTTP port: %s\n", port)
 

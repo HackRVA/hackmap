@@ -92,7 +92,7 @@ export async function saveContainersToServer() {
     imageUrl: container.imageUrl
   }));
 
-  const response = await fetch('/containers', {
+  const response = await fetch('/container', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -105,7 +105,7 @@ export async function saveContainersToServer() {
 }
 
 export async function saveItemsToServer() {
-  const response = await fetch('/items', {
+  const response = await fetch('/item', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -118,7 +118,7 @@ export async function saveItemsToServer() {
 }
 
 export async function loadContainersFromServer() {
-  const response = await fetch('/containers');
+  const response = await fetch('/container');
   if (response.ok) {
     const data = await response.json();
     containers = data.map(container => new Container(
@@ -140,7 +140,7 @@ export async function loadContainersFromServer() {
 }
 
 export async function loadItemsFromServer() {
-  const response = await fetch('/items');
+  const response = await fetch('/item');
   if (response.ok) {
     items = await response.json();
   } else {

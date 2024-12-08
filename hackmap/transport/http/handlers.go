@@ -4,17 +4,41 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 
 	"hackmap/hackmap/store"
 )
 
 func (router *Router) containerEndpoint(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
+		id := r.URL.Query().Get("id")
+		if id != "" {
+			router.drawContainers(w, r)
+			return
+		}
 		router.loadContainers(w, r)
 		return
 	}
 	if r.Method == http.MethodPost {
 		router.saveContainers(w, r)
+		return
+	}
+}
+
+func (router *Router) containerImageEndpoint(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		pathParts := strings.Split(r.URL.Path, "/")
+		if len(pathParts) < 3 {
+			http.Error(w, "Invalid URL path", http.StatusBadRequest)
+			return
+		}
+		containerID := strings.TrimSuffix(pathParts[2], ".png")
+		if containerID == "" {
+			http.Error(w, "Missing container ID", http.StatusBadRequest)
+			return
+		}
+
+		router.drawContainersWithID(w, r, containerID)
 		return
 	}
 }

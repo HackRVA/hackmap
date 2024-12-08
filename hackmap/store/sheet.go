@@ -50,6 +50,12 @@ func (s *GoogleSheetsStore[T]) Save(data []T) error {
 	values = append(values, header)
 
 	for _, item := range data {
+		if container, ok := any(item).(Container); ok {
+			if container.ID == "" {
+				container.ID = GenerateUUID()
+				item = any(container).(T)
+			}
+		}
 		values = append(values, getStructValues(item))
 	}
 
