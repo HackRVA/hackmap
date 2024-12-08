@@ -1,6 +1,8 @@
 import { Rect } from "./rect.js";
 import { Handle } from "./handle.js";
 
+const PIXELS_PER_INCH = 2;
+
 export class Container {
   constructor(
     id,
@@ -34,15 +36,15 @@ export class Container {
 
   updateResizeHandlePosition(cos, sin) {
     const resizeX =
-      this.rect.x + (this.rect.width) * cos - (this.rect.height) * sin;
+      this.rect.x + (this.rect.width * PIXELS_PER_INCH) * cos - (this.rect.height * PIXELS_PER_INCH) * sin;
     const resizeY =
-      this.rect.y + (this.rect.width) * sin + (this.rect.height) * cos;
+      this.rect.y + (this.rect.width * PIXELS_PER_INCH) * sin + (this.rect.height * PIXELS_PER_INCH) * cos;
     this.resizeHandle.setPosition(resizeX, resizeY);
   }
 
   updateRotationHandlePosition(cos, sin) {
-    const rotateX = this.rect.x + (this.rect.width / 2) * cos - (this.rect.height / 2 + 30) * sin;
-    const rotateY = this.rect.y + (this.rect.width / 2) * sin + (this.rect.height / 2 + 30) * cos;
+    const rotateX = this.rect.x + (this.rect.width * PIXELS_PER_INCH / 2) * cos - (this.rect.height * PIXELS_PER_INCH / 2 + 30) * sin;
+    const rotateY = this.rect.y + (this.rect.width * PIXELS_PER_INCH / 2) * sin + (this.rect.height * PIXELS_PER_INCH / 2 + 30) * cos;
     this.rotationHandle.setPosition(rotateX, rotateY);
   }
 
@@ -98,8 +100,8 @@ export class Container {
     const localX = dx * cos + dy * sin;
     const localY = -dx * sin + dy * cos;
 
-    const newWidth = Math.max(1, Math.abs(localX));
-    const newHeight = Math.max(1, Math.abs(localY));
+    const newWidth = Math.max(0.01, Math.abs(localX) / PIXELS_PER_INCH);
+    const newHeight = Math.max(0.01, Math.abs(localY) / PIXELS_PER_INCH);
 
     this.rect.resize(newWidth, newHeight);
   }

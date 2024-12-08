@@ -1,10 +1,12 @@
+const PIXELS_PER_INCH = 2;
+
 export class Rect {
   constructor(id, x, y, width, height, label, rotation = 0) {
     this.id = id;
     this.x = x;
     this.y = y;
-    this.width = Math.max(1, width);
-    this.height = Math.max(1, height);
+    this.width = Math.max(0.01, width);
+    this.height = Math.max(0.01, height);
     this.label = label;
     this.rotation = rotation;
   }
@@ -20,9 +22,9 @@ export class Rect {
 
     return (
       localX >= 0 &&
-      localX <= this.width &&
+      localX <= this.width * PIXELS_PER_INCH &&
       localY >= 0 &&
-      localY <= this.height
+      localY <= this.height * PIXELS_PER_INCH
     );
   }
 
@@ -32,8 +34,8 @@ export class Rect {
   }
 
   resize(newWidth, newHeight) {
-    this.width = Math.max(1, newWidth);
-    this.height = Math.max(1, newHeight);
+    this.width = Math.max(0.01, newWidth);
+    this.height = Math.max(0.01, newHeight);
   }
 
   setRotation(rotation) {
@@ -54,7 +56,7 @@ export class Rect {
 
   drawRect(ctx, highlight) {
     ctx.beginPath();
-    ctx.rect(0, 0, this.width, this.height);
+    ctx.rect(0, 0, this.width * PIXELS_PER_INCH, this.height * PIXELS_PER_INCH);
     ctx.fillStyle = highlight ? "rgba(255, 255, 0, 0.5)" : "white";
     ctx.fill();
     ctx.lineWidth = 5;
@@ -67,8 +69,8 @@ export class Rect {
     ctx.fillStyle = "black";
     ctx.font = "16px Arial";
     const textWidth = ctx.measureText(this.label).width;
-    const textX = this.width / 2 - textWidth / 2;
-    const textY = this.height / 2 + 8;
+    const textX = (this.width * PIXELS_PER_INCH) / 2 - textWidth / 2;
+    const textY = (this.height * PIXELS_PER_INCH) / 2 + 8;
     ctx.fillText(this.label, textX, textY);
   }
 }
