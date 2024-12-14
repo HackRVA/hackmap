@@ -18,7 +18,9 @@ const ctx = canvas.getContext("2d");
 const toggleModeButton = document.getElementById("toggleMode");
 const createContainerButton = document.getElementById("createContainerButton");
 const createItemButton = document.getElementById("createItemButton");
-const downloadContainersCSVButton = document.getElementById("downloadContainersCSV");
+const downloadContainersCSVButton = document.getElementById(
+  "downloadContainersCSV",
+);
 const downloadItemsCSVButton = document.getElementById("downloadItemsCSV");
 const containersCSVOutput = document.getElementById("containersCSVOutput");
 const itemsCSVOutput = document.getElementById("itemsCSVOutput");
@@ -27,13 +29,17 @@ const zoomOutButton = document.getElementById("zoomOut");
 const resetViewButton = document.getElementById("resetView");
 
 const createContainerModal = document.getElementById("createContainerModal");
-const createContainerConfirm = document.getElementById("createContainerConfirm");
+const createContainerConfirm = document.getElementById(
+  "createContainerConfirm",
+);
 const createContainerCancel = document.getElementById("createContainerCancel");
 const containerLabelInput = document.getElementById("containerLabel");
 const containerWidthInput = document.getElementById("containerWidth");
 const containerHeightInput = document.getElementById("containerHeight");
 const containerWikiPageInput = document.getElementById("containerWikiPage");
-const containerDescriptionInput = document.getElementById("containerDescription");
+const containerDescriptionInput = document.getElementById(
+  "containerDescription",
+);
 const containerImageUrlInput = document.getElementById("containerImageUrl");
 
 const createItemModal = document.getElementById("createItemModal");
@@ -59,15 +65,23 @@ const editContainerCancel = document.getElementById("editContainerCancel");
 const editContainerLabelInput = document.getElementById("editContainerLabel");
 const editContainerWidthInput = document.getElementById("editContainerWidth");
 const editContainerHeightInput = document.getElementById("editContainerHeight");
-const editContainerWikiPageInput = document.getElementById("editContainerWikiPage");
-const editContainerDescriptionInput = document.getElementById("editContainerDescription");
-const editContainerImageUrlInput = document.getElementById("editContainerImageUrl");
+const editContainerWikiPageInput = document.getElementById(
+  "editContainerWikiPage",
+);
+const editContainerDescriptionInput = document.getElementById(
+  "editContainerDescription",
+);
+const editContainerImageUrlInput = document.getElementById(
+  "editContainerImageUrl",
+);
 
 const editItemModal = document.getElementById("editItemModal");
 const editItemConfirm = document.getElementById("editItemConfirm");
 const editItemCancel = document.getElementById("editItemCancel");
 const editItemNameInput = document.getElementById("editItemName");
-const editItemContainerSelect = document.getElementById("editItemContainerSelect");
+const editItemContainerSelect = document.getElementById(
+  "editItemContainerSelect",
+);
 const editItemWikiPageInput = document.getElementById("editItemWikiPage");
 const editItemDescriptionInput = document.getElementById("editItemDescription");
 const editItemImageUrlInput = document.getElementById("editItemImageUrl");
@@ -75,7 +89,9 @@ const editItemImageUrlInput = document.getElementById("editItemImageUrl");
 const containerInfo = document.getElementById("containerInfo");
 const containerLabelInfo = document.getElementById("containerLabelInfo");
 const containerWikiPageInfo = document.getElementById("containerWikiPageInfo");
-const containerDescriptionInfo = document.getElementById("containerDescriptionInfo");
+const containerDescriptionInfo = document.getElementById(
+  "containerDescriptionInfo",
+);
 const containerImageInfo = document.getElementById("containerImageInfo");
 const containerItemsInfo = document.getElementById("containerItemsInfo");
 const editContainerButton = document.getElementById("editContainerButton");
@@ -100,7 +116,7 @@ let velocity = { x: 0, y: 0 };
 let isMouseDown = false;
 
 const backgroundImage = new Image();
-backgroundImage.src = "2026_Dabney_Floor_Plan_blank.png";
+backgroundImage.src = "/2026_Dabney_Floor_Plan_blank.png";
 backgroundImage.onload = () => {
   resizeCanvas();
   fitImageToCanvas();
@@ -144,7 +160,9 @@ async function toggleEditMode() {
     await saveItemsToServer();
   }
   isEditMode = !isEditMode;
-  toggleModeButton.textContent = isEditMode ? "Switch to View Mode" : "Switch to Edit Mode";
+  toggleModeButton.textContent = isEditMode
+    ? "Switch to View Mode"
+    : "Switch to Edit Mode";
   containerInfo.style.display = "none";
 }
 
@@ -165,7 +183,16 @@ function confirmCreateContainer() {
   const description = containerDescriptionInput.value;
   const imageUrl = containerImageUrlInput.value;
   if (label && width > 0 && height > 0) {
-    addContainer(100, 100, width, height, label, wikiPage, description, imageUrl);
+    addContainer(
+      100,
+      100,
+      width,
+      height,
+      label,
+      wikiPage,
+      description,
+      imageUrl,
+    );
     drawAllContainers();
     createContainerModal.classList.remove("is-active");
   }
@@ -196,7 +223,10 @@ function confirmEditContainer() {
   if (displayedContainer) {
     displayedContainer.rect.label = editContainerLabelInput.value;
     displayedContainer.rect.width = parseInt(editContainerWidthInput.value, 10);
-    displayedContainer.rect.height = parseInt(editContainerHeightInput.value, 10);
+    displayedContainer.rect.height = parseInt(
+      editContainerHeightInput.value,
+      10,
+    );
     displayedContainer.wikiPage = editContainerWikiPageInput.value;
     displayedContainer.description = editContainerDescriptionInput.value;
     displayedContainer.imageUrl = editContainerImageUrlInput.value;
@@ -261,8 +291,8 @@ function handleMouseWheelZoom(event) {
   const dx = mouseX - panX;
   const dy = mouseY - panY;
 
-  panX -= dx * (newScale - scale) / scale;
-  panY -= dy * (newScale - scale) / scale;
+  panX -= (dx * (newScale - scale)) / scale;
+  panY -= (dy * (newScale - scale)) / scale;
 
   scale = newScale;
   drawAllContainers();
@@ -325,7 +355,9 @@ function handleMouseDown(event) {
       showContainerInfo(selectedContainer);
     } else {
       const selectedItem = items.find((item) => {
-        const container = containers.find((c) => c.rect.id === item.containerId);
+        const container = containers.find(
+          (c) => c.rect.id === item.containerId,
+        );
         return container && container.containsPoint(x, y);
       });
       if (selectedItem) {
@@ -392,7 +424,13 @@ function fillCanvasBackground() {
 }
 
 function drawBackgroundImage() {
-  ctx.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height);
+  ctx.drawImage(
+    backgroundImage,
+    0,
+    0,
+    backgroundImage.width,
+    backgroundImage.height,
+  );
 }
 
 function drawContainers() {
@@ -403,16 +441,19 @@ function drawContainers() {
 }
 
 function resizeCanvas() {
-  const container = document.querySelector('.canvas-container');
+  const container = document.querySelector(".canvas-container");
   canvas.width = container.clientWidth;
   canvas.height = container.clientHeight;
   drawAllContainers();
 }
 
-window.addEventListener('resize', resizeCanvas);
+window.addEventListener("resize", resizeCanvas);
 
 function applyInertia() {
-  if (!isMouseDown && (Math.abs(velocity.x) > 0.1 || Math.abs(velocity.y) > 0.1)) {
+  if (
+    !isMouseDown &&
+    (Math.abs(velocity.x) > 0.1 || Math.abs(velocity.y) > 0.1)
+  ) {
     panX += velocity.x;
     panY += velocity.y;
     velocity.x *= 0.95;
@@ -474,18 +515,18 @@ function showContainerInfo(container) {
   containerItemsInfo.innerHTML = "";
   items.forEach((item) => {
     const li = document.createElement("li");
-    const span = document.createElement("span")
+    const span = document.createElement("span");
     span.textContent = item.name;
     span.addEventListener("click", () => {
       selectedItem = item;
       showItemInfo(item);
-    })
-    li.appendChild(span)
+    });
+    li.appendChild(span);
     const editButton = document.createElement("button");
     editButton.textContent = "Edit";
     editButton.classList.add("button", "is-small", "is-info");
     editButton.addEventListener("click", () => showEditItemModal(item.name));
-    li.classList.add("container-item")
+    li.classList.add("container-item");
     li.appendChild(editButton);
     containerItemsInfo.appendChild(li);
   });
@@ -505,7 +546,7 @@ function showEditContainerModal() {
 }
 
 function showEditItemModal(itemName) {
-  selectedItem = items.find(item => item.name === itemName);
+  selectedItem = items.find((item) => item.name === itemName);
   if (selectedItem) {
     populateEditItemContainerSelect();
     editItemNameInput.value = selectedItem.name;
@@ -525,8 +566,6 @@ function showEditItemModal(itemName) {
     editItemModal.classList.add("is-active");
   }
 }
-
-
 
 searchBox.addEventListener("input", handleSearchInput);
 
@@ -548,13 +587,21 @@ function searchContainersAndItems(searchTerm) {
 
   containers.forEach((container) => {
     if (container.rect.label.toLowerCase().includes(searchTerm)) {
-      results.push({ type: "container", label: container.rect.label, id: container.rect.id });
+      results.push({
+        type: "container",
+        label: container.rect.label,
+        id: container.rect.id,
+      });
     }
   });
 
   items.forEach((item) => {
     if (item.name.toLowerCase().includes(searchTerm)) {
-      results.push({ type: "item", label: item.name, containerId: item.containerId });
+      results.push({
+        type: "item",
+        label: item.name,
+        containerId: item.containerId,
+      });
     }
   });
 

@@ -1,0 +1,462 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HackMap</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css"
+    />
+    <style>
+      .canvas-container {
+        position: relative;
+        width: 100%;
+        height: 40vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      canvas {
+        border: 1px solid black;
+        max-width: 100%;
+        max-height: 100%;
+      }
+
+      .controls {
+        margin-top: 10px;
+        text-align: center;
+      }
+
+      textarea {
+        margin-top: 10px;
+        width: 100%;
+        height: 150px;
+      }
+
+      .container-info {
+        margin-top: 20px;
+        display: none;
+      }
+
+      .container-item {
+        display: grid;
+        grid-template-columns: 1fr 0.1fr 1fr;
+      }
+    </style>
+
+    <script type="module" src="/static/js/registry.js"></script>
+  </head>
+
+  <body>
+    <section>
+      <app-bar></app-bar>
+    </section>
+    <section class="section">
+      <div class="field">
+        <label class="label">Search</label>
+        <div class="control">
+          <input
+            id="searchBox"
+            class="input"
+            type="text"
+            placeholder="Search for containers or items"
+          />
+        </div>
+        <div id="searchResults" class="box" style="display: none">
+          <ul id="searchResultsList"></ul>
+        </div>
+      </div>
+      <button id="toggleMode" class="button is-primary">
+        Switch to Edit Mode
+      </button>
+      <div class="container">
+        <div class="canvas-container">
+          <canvas id="mapCanvas"></canvas>
+        </div>
+
+        <div class="controls">
+          <div class="buttons are-small">
+            <button id="createContainerButton" class="button is-link">
+              Create Container
+            </button>
+            <button id="createItemButton" class="button is-link">
+              Create Item
+            </button>
+
+            <button id="zoomIn" class="button is-success">Zoom In</button>
+            <button id="zoomOut" class="button is-warning">Zoom Out</button>
+            <button id="resetView" class="button is-danger">Reset View</button>
+          </div>
+        </div>
+        <div id="containerInfo" class="container-info box">
+          <h2 class="title">Container Information</h2>
+          <p><strong>Label:</strong> <span id="containerLabelInfo"></span></p>
+          <p>
+            <strong>Wiki Page:</strong> <span id="containerWikiPageInfo"></span>
+          </p>
+          <p>
+            <strong>Description:</strong>
+            <span id="containerDescriptionInfo"></span>
+          </p>
+          <p>
+            <strong>Image:</strong>
+            <img
+              id="containerImageInfo"
+              src=""
+              alt="Container Image"
+              style="max-width: 100px; max-height: 100px"
+            />
+          </p>
+          <p><strong>Items:</strong></p>
+          <ul id="containerItemsInfo"></ul>
+          <div class="buttons">
+            <button id="editContainerButton" class="button is-info">
+              Edit Container
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="itemInfo" class="container-info box" style="display: none">
+        <h2 class="title">Item Information</h2>
+        <p><strong>Name:</strong> <span id="itemNameInfo"></span></p>
+        <p><strong>Container:</strong> <span id="itemContainerInfo"></span></p>
+        <p><strong>Wiki Page:</strong> <span id="itemWikiPageInfo"></span></p>
+        <p>
+          <strong>Description:</strong> <span id="itemDescriptionInfo"></span>
+        </p>
+        <p>
+          <strong>Image:</strong>
+          <img
+            id="itemImageInfo"
+            src=""
+            alt="Item Image"
+            style="max-width: 100px; max-height: 100px"
+          />
+        </p>
+        <div class="buttons">
+          <button id="editItemButton" class="button is-info">Edit Item</button>
+        </div>
+      </div>
+    </section>
+
+    <div id="createContainerModal" class="modal">
+      <div class="modal-background"></div>
+      <div class="modal-content">
+        <div class="box">
+          <h1 class="title">Create Container</h1>
+          <div class="field">
+            <label class="label">Label</label>
+            <div class="control">
+              <input
+                id="containerLabel"
+                class="input"
+                type="text"
+                placeholder="Container Label"
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Width</label>
+            <div class="control">
+              <input
+                id="containerWidth"
+                class="input"
+                type="number"
+                placeholder="Width"
+                value="100"
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Height</label>
+            <div class="control">
+              <input
+                id="containerHeight"
+                class="input"
+                type="number"
+                placeholder="Height"
+                value="50"
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Wiki Page</label>
+            <div class="control">
+              <input
+                id="containerWikiPage"
+                class="input"
+                type="text"
+                placeholder="Wiki Page URL"
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Description</label>
+            <div class="control">
+              <textarea
+                id="containerDescription"
+                class="textarea"
+                placeholder="Description"
+              ></textarea>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Image URL</label>
+            <div class="control">
+              <input
+                id="containerImageUrl"
+                class="input"
+                type="text"
+                placeholder="Image URL"
+              />
+            </div>
+          </div>
+          <div class="buttons">
+            <button id="createContainerConfirm" class="button is-success">
+              Create
+            </button>
+            <button id="createContainerCancel" class="button is-danger">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="createItemModal" class="modal">
+      <div class="modal-background"></div>
+      <div class="modal-content">
+        <div class="box">
+          <h1 class="title">Create Item</h1>
+          <div class="field">
+            <label class="label">Item Name</label>
+            <div class="control">
+              <input
+                id="itemName"
+                class="input"
+                type="text"
+                placeholder="Item Name"
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Container</label>
+            <div class="control">
+              <div class="select">
+                <select id="itemContainerSelect"></select>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Wiki Page</label>
+            <div class="control">
+              <input
+                id="itemWikiPage"
+                class="input"
+                type="text"
+                placeholder="Wiki Page URL"
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Description</label>
+            <div class="control">
+              <textarea
+                id="itemDescription"
+                class="textarea"
+                placeholder="Description"
+              ></textarea>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Image URL</label>
+            <div class="control">
+              <input
+                id="itemImageUrl"
+                class="input"
+                type="text"
+                placeholder="Image URL"
+              />
+            </div>
+          </div>
+          <div class="buttons">
+            <button id="createItemConfirm" class="button is-success">
+              Create
+            </button>
+            <button id="createItemCancel" class="button is-danger">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="editContainerModal" class="modal">
+      <div class="modal-background"></div>
+      <div class="modal-content">
+        <div class="box">
+          <h1 class="title">Edit Container</h1>
+          <div class="field">
+            <label class="label">Label</label>
+            <div class="control">
+              <input
+                id="editContainerLabel"
+                class="input"
+                type="text"
+                placeholder="Container Label"
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Width</label>
+            <div class="control">
+              <input
+                id="editContainerWidth"
+                class="input"
+                type="number"
+                placeholder="Width"
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Height</label>
+            <div class="control">
+              <input
+                id="editContainerHeight"
+                class="input"
+                type="number"
+                placeholder="Height"
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Wiki Page</label>
+            <div class="control">
+              <input
+                id="editContainerWikiPage"
+                class="input"
+                type="text"
+                placeholder="Wiki Page URL"
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Description</label>
+            <div class="control">
+              <textarea
+                id="editContainerDescription"
+                class="textarea"
+                placeholder="Description"
+              ></textarea>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Image URL</label>
+            <div class="control">
+              <input
+                id="editContainerImageUrl"
+                class="input"
+                type="text"
+                placeholder="Image URL"
+              />
+            </div>
+          </div>
+          <div class="buttons">
+            <button id="editContainerConfirm" class="button is-success">
+              Save
+            </button>
+            <button id="editContainerCancel" class="button is-danger">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="editItemModal" class="modal">
+      <div class="modal-background"></div>
+      <div class="modal-content">
+        <div class="box">
+          <h1 class="title">Edit Item</h1>
+          <div class="field">
+            <label class="label">Item Name</label>
+            <div class="control">
+              <input
+                id="editItemName"
+                class="input"
+                type="text"
+                placeholder="Item Name"
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Container</label>
+            <div class="control">
+              <div class="select">
+                <select id="editItemContainerSelect"></select>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Wiki Page</label>
+            <div class="control">
+              <input
+                id="editItemWikiPage"
+                class="input"
+                type="text"
+                placeholder="Wiki Page URL"
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Description</label>
+            <div class="control">
+              <textarea
+                id="editItemDescription"
+                class="textarea"
+                placeholder="Description"
+              ></textarea>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Image URL</label>
+            <div class="control">
+              <input
+                id="editItemImageUrl"
+                class="input"
+                type="text"
+                placeholder="Image URL"
+              />
+            </div>
+          </div>
+          <div class="buttons">
+            <button id="editItemConfirm" class="button is-success">Save</button>
+            <button id="editItemCancel" class="button is-danger">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--<div class="buttons">-->
+    <!--  <button id="downloadContainersCSV" class="button is-info">Download Containers CSV</button>-->
+    <!--  <button id="downloadItemsCSV" class="button is-info">Download Items CSV</button>-->
+    <!--</div>-->
+    <!--<div class="field">-->
+    <!--  <label class="label">Containers CSV</label>-->
+    <!--  <div class="control">-->
+    <!--    <textarea id="containersCSVOutput" class="textarea" readonly placeholder="Containers CSV"></textarea>-->
+    <!--  </div>-->
+    <!--</div>-->
+    <!--<div class="field">-->
+    <!--  <label class="label">Items CSV</label>-->
+    <!--  <div class="control">-->
+    <!--    <textarea id="itemsCSVOutput" class="textarea" readonly placeholder="Items CSV"></textarea>-->
+    <!--  </div>-->
+    <!--</div>-->
+
+    <script src="/static/js/store.js" type="module"></script>
+    <script src="/static/js/map.js" type="module"></script>
+  </body>
+</html>

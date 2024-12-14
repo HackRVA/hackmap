@@ -1,3 +1,6 @@
 *.csv
 *.csv.lock
 service_account.json
+
+tmp
+

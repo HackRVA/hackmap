@@ -17,13 +17,13 @@ export class Handle {
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     ctx.fillStyle = this.getFillColor();
     ctx.fill();
-    ctx.strokeStyle = 'black';
+    ctx.strokeStyle = "black";
     ctx.stroke();
     ctx.closePath();
   }
 
   getFillColor() {
-    return this.type === 'rotate' ? 'red' : 'white';
+    return this.type === "rotate" ? "red" : "white";
   }
 
   setPosition(x, y) {

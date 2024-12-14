@@ -36,15 +36,25 @@ export class Container {
 
   updateResizeHandlePosition(cos, sin) {
     const resizeX =
-      this.rect.x + (this.rect.width * PIXELS_PER_INCH) * cos - (this.rect.height * PIXELS_PER_INCH) * sin;
+      this.rect.x +
+      this.rect.width * PIXELS_PER_INCH * cos -
+      this.rect.height * PIXELS_PER_INCH * sin;
     const resizeY =
-      this.rect.y + (this.rect.width * PIXELS_PER_INCH) * sin + (this.rect.height * PIXELS_PER_INCH) * cos;
+      this.rect.y +
+      this.rect.width * PIXELS_PER_INCH * sin +
+      this.rect.height * PIXELS_PER_INCH * cos;
     this.resizeHandle.setPosition(resizeX, resizeY);
   }
 
   updateRotationHandlePosition(cos, sin) {
-    const rotateX = this.rect.x + (this.rect.width * PIXELS_PER_INCH / 2) * cos - (this.rect.height * PIXELS_PER_INCH / 2 + 30) * sin;
-    const rotateY = this.rect.y + (this.rect.width * PIXELS_PER_INCH / 2) * sin + (this.rect.height * PIXELS_PER_INCH / 2 + 30) * cos;
+    const rotateX =
+      this.rect.x +
+      ((this.rect.width * PIXELS_PER_INCH) / 2) * cos -
+      ((this.rect.height * PIXELS_PER_INCH) / 2 + 30) * sin;
+    const rotateY =
+      this.rect.y +
+      ((this.rect.width * PIXELS_PER_INCH) / 2) * sin +
+      ((this.rect.height * PIXELS_PER_INCH) / 2 + 30) * cos;
     this.rotationHandle.setPosition(rotateX, rotateY);
   }
 
