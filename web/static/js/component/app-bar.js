@@ -1,7 +1,14 @@
-export default class AppBar extends HTMLElement {
-  constructor() {
-    super();
-    this.innerHTML = `
+export default function AppBar(ctx) {
+  ctx.onConnected(function () {
+    ctx.dom?.querySelector(".navbar-burger").addEventListener("click", () => {
+      const target = ctx.dom.querySelector(".navbar-burger").dataset.target;
+      const $target = ctx.dom.querySelector(`#${target}`);
+      ctx.dom.querySelector(".navbar-burger").classList.toggle("is-active");
+      $target.classList.toggle("is-active");
+    });
+  });
+
+  return () => `
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
@@ -54,12 +61,4 @@ export default class AppBar extends HTMLElement {
         </div>
       </nav>
     `;
-
-    this.querySelector(".navbar-burger").addEventListener("click", () => {
-      const target = this.querySelector(".navbar-burger").dataset.target;
-      const $target = this.querySelector(`#${target}`);
-      this.querySelector(".navbar-burger").classList.toggle("is-active");
-      $target.classList.toggle("is-active");
-    });
-  }
 }

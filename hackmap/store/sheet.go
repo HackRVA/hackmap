@@ -6,6 +6,7 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"time"
 
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
@@ -13,13 +14,14 @@ import (
 )
 
 type GoogleSheetsStore[T Model] struct {
-	sheetID string
-	tabName string
-	service *sheets.Service
+	sheetID      string
+	tabName      string
+	service      *sheets.Service
+	cache        map[string]T
+	cacheUpdated time.Time
 }
 
 func NewGoogleSheetsStore[T Model](serviceAccountFile string, sheetID, tabName string) (*GoogleSheetsStore[T], error) {
-	ctx := context.Background()
 	b, err := os.ReadFile(serviceAccountFile)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read service account file: %w", err)
@@ -30,6 +32,7 @@ func NewGoogleSheetsStore[T Model](serviceAccountFile string, sheetID, tabName s
 		return nil, fmt.Errorf("unable to parse service account file to config: %w", err)
 	}
 
+	ctx := context.Background()
 	client := config.Client(ctx)
 
 	service, err := sheets.NewService(ctx, option.WithHTTPClient(client))
@@ -37,25 +40,41 @@ func NewGoogleSheetsStore[T Model](serviceAccountFile string, sheetID, tabName s
 		return nil, fmt.Errorf("unable to retrieve Sheets client: %w", err)
 	}
 
-	return &GoogleSheetsStore[T]{
+	store := &GoogleSheetsStore[T]{
 		sheetID: sheetID,
 		tabName: tabName,
 		service: service,
-	}, nil
+		cache:   make(map[string]T),
+	}
+
+	if err := store.RefreshCache(); err != nil {
+		return nil, fmt.Errorf("unable to refresh cache: %w", err)
+	}
+
+	return store, nil
 }
 
 func (s *GoogleSheetsStore[T]) Save(data []T) error {
+	for _, item := range data {
+		switch v := any(item).(type) {
+		case Container:
+			if v.ID == "" {
+				v.ID = GenerateUUID()
+				item = any(v).(T)
+			}
+			s.cache[v.GetID()] = item
+		case Item:
+			s.cache[v.GetID()] = item
+		default:
+			return fmt.Errorf("unsupported type: %T", v)
+		}
+	}
+
 	var values [][]interface{}
 	header := getStructFields[T]()
 	values = append(values, header)
 
-	for _, item := range data {
-		if container, ok := any(item).(Container); ok {
-			if container.ID == "" {
-				container.ID = GenerateUUID()
-				item = any(container).(T)
-			}
-		}
+	for _, item := range s.cache {
 		values = append(values, getStructValues(item))
 	}
 
@@ -70,23 +89,89 @@ func (s *GoogleSheetsStore[T]) Save(data []T) error {
 }
 
 func (s *GoogleSheetsStore[T]) Load() ([]T, error) {
-	resp, err := s.service.Spreadsheets.Values.Get(s.sheetID, s.tabName+"!A1:Z").Do()
-	if err != nil {
-		return nil, fmt.Errorf("unable to retrieve data from sheet: %w", err)
-	}
-
-	if len(resp.Values) == 0 {
-		return []T{}, nil
+	if len(s.cache) == 0 {
+		if err := s.loadCache(); err != nil {
+			return nil, fmt.Errorf("unable to load cache: %w", err)
+		}
 	}
 
 	var data []T
-	for _, row := range resp.Values[1:] {
-		item := new(T)
-		setStructValues(item, row)
-		data = append(data, *item)
+	for _, item := range s.cache {
+		data = append(data, item)
 	}
 
 	return data, nil
+}
+
+func (s *GoogleSheetsStore[T]) loadCache() error {
+	resp, err := s.service.Spreadsheets.Values.Get(s.sheetID, s.tabName+"!A1:Z").Do()
+	if err != nil {
+		return fmt.Errorf("unable to retrieve data from sheet for cache: %w", err)
+	}
+
+	if len(resp.Values) == 0 {
+		return nil
+	}
+
+	if s.cache == nil {
+		s.cache = make(map[string]T)
+	}
+
+	for _, row := range resp.Values[1:] {
+		item := new(T)
+		err := setStructValues(item, row)
+		if err != nil {
+			return fmt.Errorf("error setting struct values: %w", err)
+		}
+
+		switch v := any(*item).(type) {
+		case Container:
+			s.cache[v.GetID()] = *item
+		case Item:
+			s.cache[v.GetID()] = *item
+		default:
+			return fmt.Errorf("unsupported type: %T", v)
+		}
+	}
+
+	return nil
+}
+
+func (s *GoogleSheetsStore[T]) RefreshCache() error {
+	newCache := make(map[string]T)
+	resp, err := s.service.Spreadsheets.Values.Get(s.sheetID, s.tabName+"!A1:Z").Do()
+	if err != nil {
+		return fmt.Errorf("unable to retrieve data from sheet for cache: %w", err)
+	}
+
+	if len(resp.Values) == 0 {
+		return nil
+	}
+
+	for _, row := range resp.Values[1:] {
+		item := new(T)
+		err := setStructValues(item, row)
+		if err != nil {
+			return fmt.Errorf("error setting struct values: %w", err)
+		}
+
+		switch v := any(*item).(type) {
+		case Container:
+			newCache[v.GetID()] = *item
+		case Item:
+			newCache[v.GetID()] = *item
+		default:
+			return fmt.Errorf("unsupported type: %T", v)
+		}
+	}
+
+	s.cache = newCache
+	s.cacheUpdated = time.Now()
+	return nil
+}
+
+func (s *GoogleSheetsStore[T]) GetCacheInfo() (int, time.Time) {
+	return len(s.cache), s.cacheUpdated
 }
 
 func getStructFields[T any]() []interface{} {
@@ -119,7 +204,6 @@ func setStructValues[T any](item *T, values []interface{}) error {
 				value := values[i]
 				fieldType := field.Type()
 
-				// Convert value to the appropriate type
 				convertedValue, err := convertValue(value, fieldType)
 				if err != nil {
 					return fmt.Errorf("error converting value: %w", err)

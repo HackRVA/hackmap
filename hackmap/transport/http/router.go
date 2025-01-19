@@ -30,6 +30,8 @@ func (r *Router) Run(port string) {
 	http.HandleFunc("/download/containers.csv", r.serveContainersCSV)
 	http.HandleFunc("/download/items.csv", r.serveItemsCSV)
 	http.HandleFunc("/container/", r.containerImageEndpoint)
+	http.HandleFunc("/cache/refresh", r.refreshCacheEndpoint)
+	http.HandleFunc("/cache/info", r.cacheInfoEndpoint)
 
 	log.Printf("Serving embedded files on HTTP port: %s\n", port)
 

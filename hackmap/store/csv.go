@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/gofrs/flock"
 )
@@ -114,6 +115,14 @@ func (s *ContainerStore) Load() ([]Container, error) {
 	return data, nil
 }
 
+func (s *ContainerStore) RefreshCache() error {
+	return nil
+}
+
+func (s *ContainerStore) GetCacheInfo() (int, time.Time) {
+	return 0, time.Now()
+}
+
 type ItemStore struct {
 	filePath string
 }
@@ -201,6 +210,14 @@ func (s *ItemStore) Load() ([]Item, error) {
 	}
 
 	return data, nil
+}
+
+func (s *ItemStore) RefreshCache() error {
+	return nil
+}
+
+func (s *ItemStore) GetCacheInfo() (int, time.Time) {
+	return 0, time.Now()
 }
 
 func ensureStoreDir() error {

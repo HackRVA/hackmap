@@ -125,3 +125,50 @@ func (router *Router) generateUUID(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"uuid": uuid})
 }
+
+func (router *Router) refreshCacheEndpoint(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	err := router.ContainerStore.RefreshCache()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error refreshing container cache: %v", err)
+		return
+	}
+
+	err = router.ItemStore.RefreshCache()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error refreshing item cache: %v", err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (router *Router) cacheInfoEndpoint(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	containerCount, containerUpdated := router.ContainerStore.GetCacheInfo()
+	itemCount, itemUpdated := router.ItemStore.GetCacheInfo()
+
+	cacheInfo := map[string]interface{}{
+		"containers": map[string]interface{}{
+			"count":   containerCount,
+			"updated": containerUpdated,
+		},
+		"items": map[string]interface{}{
+			"count":   itemCount,
+			"updated": itemUpdated,
+		},
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(cacheInfo)
+}

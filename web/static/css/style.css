@@ -76,3 +76,9 @@
   text-decoration: none;
   cursor: pointer;
 }
+
+#cache-update-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}

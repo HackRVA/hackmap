@@ -30,6 +30,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("failed to create containers store %s", err)
 		}
+		println("using csv")
 	} else {
 		containerStore, err = store.NewGoogleSheetsStore[store.Container](credsFilePath, sheetID, "Containers")
 		if err != nil {
@@ -39,6 +40,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("failed to create containers store %s", err)
 		}
+		println("using google sheet")
 	}
 
 	r := &httprouter.Router{
