@@ -1,11 +1,14 @@
-export default function CacheUpdateButton(ctx) {
-  let cacheInfo = null;
+export default class CacheUpdateButton extends HTMLElement {
+  constructor() {
+    super();
+    this.cacheInfo = null;
+  }
 
-  async function fetchCacheInfo() {
+  async fetchCacheInfo() {
     try {
       const response = await fetch(`/cache/info`);
       if (response.ok) {
-        cacheInfo = await response.json();
+        this.cacheInfo = await response.json();
       } else {
         console.error("Failed to fetch cache info");
       }
@@ -14,8 +17,8 @@ export default function CacheUpdateButton(ctx) {
     }
   }
 
-  function showPopover(event) {
-    if (!cacheInfo) return;
+  showPopover(event) {
+    if (!this.cacheInfo) return;
 
     const popover = document.createElement("div");
     popover.id = "cache-info-popover";
@@ -26,8 +29,8 @@ export default function CacheUpdateButton(ctx) {
     popover.style.boxShadow = "0 2px 10px rgba(0, 0, 0, 0.1)";
     popover.style.zIndex = "1000";
 
-    const containerInfo = cacheInfo.containers;
-    const itemInfo = cacheInfo.items;
+    const containerInfo = this.cacheInfo.containers;
+    const itemInfo = this.cacheInfo.items;
 
     popover.innerHTML = `
       <div><strong>Containers:</strong></div>
@@ -46,17 +49,19 @@ export default function CacheUpdateButton(ctx) {
     popover.style.left = `${rect.left + window.scrollX - popoverRect.width}px`;
   }
 
-  function hidePopover() {
+  hidePopover() {
     const popover = document.getElementById("cache-info-popover");
     if (popover) {
       popover.remove();
     }
   }
 
-  ctx.onConnected(async () => {
-    await fetchCacheInfo();
+  async connectedCallback() {
+    this.innerHTML = `<button id="cache-update-btn" class="button">update cache</button>`;
 
-    const button = ctx.dom.querySelector("#cache-update-btn");
+    await this.fetchCacheInfo();
+
+    const button = this.querySelector("#cache-update-btn");
 
     button.addEventListener("click", async () => {
       console.log("hello");
@@ -64,13 +69,12 @@ export default function CacheUpdateButton(ctx) {
         method: "POST",
       });
       console.log(response);
-      await fetchCacheInfo();
+      await this.fetchCacheInfo();
     });
 
-    button.addEventListener("mouseenter", showPopover);
-    button.addEventListener("mouseleave", hidePopover);
-  });
-
-  return () =>
-    `<button id="cache-update-btn" class="button">update cache</button>`;
+    button.addEventListener("mouseenter", this.showPopover.bind(this));
+    button.addEventListener("mouseleave", this.hidePopover.bind(this));
+  }
 }
+
+customElements.define("cache-update-button", CacheUpdateButton);

@@ -1,14 +1,6 @@
-export default function AppBar(ctx) {
-  ctx.onConnected(function () {
-    ctx.dom?.querySelector(".navbar-burger").addEventListener("click", () => {
-      const target = ctx.dom.querySelector(".navbar-burger").dataset.target;
-      const $target = ctx.dom.querySelector(`#${target}`);
-      ctx.dom.querySelector(".navbar-burger").classList.toggle("is-active");
-      $target.classList.toggle("is-active");
-    });
-  });
-
-  return () => `
+export default class AppBar extends HTMLElement {
+  connectedCallback() {
+    this.innerHTML = `
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
@@ -43,10 +35,10 @@ export default function AppBar(ctx) {
         <div id="navbarBasicExample" class="navbar-menu">
           <div class="navbar-start">
             <a class="navbar-item" href="/">
-             Search 
+             Search
             </a>
             <a class="navbar-item" href="/edit">
-             Edit 
+             Edit
             </a>
 
           </div>
@@ -61,4 +53,14 @@ export default function AppBar(ctx) {
         </div>
       </nav>
     `;
+
+    this.querySelector(".navbar-burger").addEventListener("click", () => {
+      const target = this.querySelector(".navbar-burger").dataset.target;
+      const $target = this.querySelector(`#${target}`);
+      this.querySelector(".navbar-burger").classList.toggle("is-active");
+      $target.classList.toggle("is-active");
+    });
+  }
 }
+
+customElements.define("app-bar", AppBar);
