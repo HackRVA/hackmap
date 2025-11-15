@@ -14,17 +14,22 @@ class SearchResults extends HTMLElement {
     this.results.forEach((result) => {
       const div = document.createElement("div");
       div.className = "column is-full";
+
+      const typeInfo = result.type ? `<p class="subtitle is-6">Type: ${result.type}</p>` : "";
+      const containerInfo = result.label ? `<p class="subtitle is-6">Container: ${result.label}</p>` : "";
+
       div.innerHTML = `
         <div class="card result-card">
           <div class="card-content">
             <div class="media">
               <div class="media-content">
                 <p class="title is-4">${result.name}</p>
-                <p class="subtitle is-6">Container: ${result.label}</p>
+                ${typeInfo}
+                ${containerInfo}
                 ${result.wikiUrl && result.wikiUrl !== "#" ? `<p class="subtitle is-6">Wiki Page: <a href="${result.wikiUrl}" target="_blank">${result.wikiUrl}</a></p>` : ""}
               </div>
             </div>
-            <div class="content">${result.description}</div>
+            <div class="content">${result.description || ""}</div>
           </div>
           <div class="card-image">
             <figure class="image">

@@ -20,9 +20,19 @@ document.addEventListener("DOMContentLoaded", () => {
   searchBar.addEventListener("search-input", (event) => {
     const query = event.detail;
     if (query) {
-      const suggestions = items.filter((item) =>
+      const itemSuggestions = items.filter((item) =>
         item.name.toLowerCase().includes(query),
       );
+      const containerSuggestions = containers
+        .filter((container) =>
+          container.label.toLowerCase().includes(query),
+        )
+        .map((container) => ({
+          ...container,
+          name: container.label,
+          isContainer: true,
+        }));
+      const suggestions = [...containerSuggestions, ...itemSuggestions];
       autocomplete.setSuggestions(suggestions);
     } else {
       autocomplete.setSuggestions([]);
@@ -32,10 +42,24 @@ document.addEventListener("DOMContentLoaded", () => {
   searchBar.addEventListener("search-enter", (event) => {
     const query = event.detail;
     if (query) {
+      const matchedContainers = containers.filter((container) =>
+        container.label.toLowerCase().includes(query),
+      );
       const matchedItems = items.filter((item) =>
         item.name.toLowerCase().includes(query),
       );
-      const resultsData = matchedItems.map((item) => {
+
+      const containerResults = matchedContainers.map((container) => ({
+        name: container.label,
+        label: "",
+        description: container.description,
+        containerImageUrl: `/container/${container.id}.png`,
+        imageUrl: container.imageUrl || "https://via.placeholder.com/150",
+        wikiUrl: container.wikiPage || "#",
+        type: "Container",
+      }));
+
+      const itemResults = matchedItems.map((item) => {
         const container = containers.find((c) => c.id === item.containerId);
         return {
           name: item.name,
@@ -43,9 +67,12 @@ document.addEventListener("DOMContentLoaded", () => {
           description: item.description,
           containerImageUrl: `/container/${container.id}.png`,
           imageUrl: item.imageUrl || "https://via.placeholder.com/150",
-          wikiUrl: item.wikiUrl || "#",
+          wikiUrl: item.wikiPage || "#",
+          type: "Item",
         };
       });
+
+      const resultsData = [...containerResults, ...itemResults];
       results.setResults(resultsData);
       autocomplete.setSuggestions([]);
     } else {
@@ -64,18 +91,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
   autocomplete.addEventListener("suggestion-click", (event) => {
     const item = event.detail;
-    const container = containers.find((c) => c.id === item.containerId);
-    if (container) {
+
+    if (item.isContainer) {
       results.setResults([
         {
-          name: item.name,
-          label: container.label,
+          name: item.label,
+          label: "",
           description: item.description,
+          containerImageUrl: `/container/${item.id}.png`,
           imageUrl: item.imageUrl || "https://via.placeholder.com/150",
-          wikiUrl: item.wikiUrl || "#",
+          wikiUrl: item.wikiPage || "#",
+          type: "Container",
         },
       ]);
-      autocomplete.setSuggestions([]);
+    } else {
+      const container = containers.find((c) => c.id === item.containerId);
+      if (container) {
+        results.setResults([
+          {
+            name: item.name,
+            label: container.label,
+            description: item.description,
+            containerImageUrl: `/container/${container.id}.png`,
+            imageUrl: item.imageUrl || "https://via.placeholder.com/150",
+            wikiUrl: item.wikiPage || "#",
+            type: "Item",
+          },
+        ]);
+      }
     }
+    autocomplete.setSuggestions([]);
   });
 });
