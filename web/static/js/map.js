@@ -511,6 +511,7 @@ function showContainerInfo(container) {
   containerWikiPageInfo.textContent = container.wikiPage;
   containerDescriptionInfo.textContent = container.description;
   containerImageInfo.src = container.imageUrl;
+
   const items = getItemsInContainer(container.rect.id);
   containerItemsInfo.innerHTML = "";
   items.forEach((item) => {

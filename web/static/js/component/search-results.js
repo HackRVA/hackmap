@@ -1,3 +1,5 @@
+import { ensureFontAwesomeLoaded } from "../utils/font-awesome.js";
+
 class SearchResults extends HTMLElement {
   constructor() {
     super();
@@ -11,12 +13,24 @@ class SearchResults extends HTMLElement {
 
   render() {
     this.innerHTML = "";
+    ensureFontAwesomeLoaded();
+
     this.results.forEach((result) => {
       const div = document.createElement("div");
       div.className = "column is-full";
 
       const typeInfo = result.type ? `<p class="subtitle is-6">Type: ${result.type}</p>` : "";
       const containerInfo = result.label ? `<p class="subtitle is-6">Container: ${result.label}</p>` : "";
+
+      const imageContent = result.containerImageUrl
+        ? `<figure class="image">
+             <img src="${result.containerImageUrl}" alt="Container Image" class="tiny-image clickable-image">
+           </figure>`
+        : `<div class="box has-background-light has-text-centered image-placeholder" style="width: 150px; height: 150px; display: flex; align-items: center; justify-content: center;">
+             <span class="icon is-large has-text-grey-light">
+               <i class="fas fa-image fa-3x"></i>
+             </span>
+           </div>`;
 
       div.innerHTML = `
         <div class="card result-card">
@@ -32,18 +46,18 @@ class SearchResults extends HTMLElement {
             <div class="content">${result.description || ""}</div>
           </div>
           <div class="card-image">
-            <figure class="image">
-              <img src="${result.containerImageUrl || "https://via.placeholder.com/150"}" alt="Item Image" class="tiny-image">
-            </figure>
+            ${imageContent}
           </div>
         </div>
       `;
       this.appendChild(div);
 
-      const tinyImage = div.querySelector(".tiny-image");
-      tinyImage.addEventListener("click", () =>
-        this.showModal(result.containerImageUrl),
-      );
+      if (result.containerImageUrl) {
+        const tinyImage = div.querySelector(".clickable-image");
+        tinyImage.addEventListener("click", () =>
+          this.showModal(result.containerImageUrl),
+        );
+      }
     });
 
     const modal = document.createElement("div");
